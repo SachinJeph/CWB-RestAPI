@@ -1,7 +1,8 @@
 var express = require('express');
+var path = require('path');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
-var jwt = require('jsonwebtoken');
+var jwt = require('jwt-simple');
 var mongoose = require('mongoose');
 var methodOverride = require('method-override');
 
@@ -9,7 +10,6 @@ var methodOverride = require('method-override');
 var app = express();
 
 var port = process.env.PORT || 7000;
-var secret = process.env.JWT_SECRET || "12kcjkelsa3jljxlcjwoe";
 
 // Add Middleware necessary for REST API's
 app.use(express.static(__dirname + '/public'));
@@ -22,16 +22,36 @@ app.use(methodOverride());
 // CORS Support
 app.use(function(req, res, next){
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
 	next();
 });
 
-// Models
-var User = require('./models/User');
+app.all('/app/v1/*', function(req, res, next){
+	res.header("Access-Control-Allow-Origin", "*"); // restrict it to required domain
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	res.header("Access-Control-Allow-Headers", 'Content-type,Accept,X-Access-Token,X-Key'); // Set custom headers for CORS
+	
+	if(req.method == 'OPTIONS') res.status(200).end();
+	next();
+});
 
-// Routes
-require('./app/routesTodo.js')(app);
+// Import the model
+var UserModel = require('./models/user');
+
+// Routes for old services
+require('./app/routesTodo.js')(app); // todos apis
+
+// Auth Middleware
+// Only the requresst that start with /api/v1/* will be checked for the token.
+// Any URL's That do not follow the below pattern should be avoided unless you are sure that authentication is not needed
+app.all('/api/v1/*', [require('./middlewares/validateRequest')]);
+
+app.use('/', require('./routes'));
+
+app.use(function(req, res, next){
+	res.status(404).send('Page Not Found');
+});
 
 // Connect to mongoDB and start the server
 mongoose.connect('mongodb://localhost/rest-api');
@@ -42,88 +62,3 @@ mongoose.connection.once('open', function(){
 	console.log('Listening on port ' + port + '...');
 	app.listen(port);
 });
-
-app.post('/authenticate', function(req, res){
-	User.findOne({email:req.body.email, password:req.body.password}, function(err, user){
-		if(err){
-			res.json({
-				type:false,
-				data: "Error occured: " + err
-			});
-		}else{
-			if(user){
-				res.json({
-					type:true,
-					data: user,
-					token: user.token
-				});
-			}else{
-				res.json({
-					type:false,
-					data: "Incorrect email/password"
-				});
-			}
-		}
-	});
-});
-
-app.post('/register', function(req, res){
-	User.findOne({email:req.body.email}, function(err, user){
-		if(err){
-			res.json({
-				type: false,
-				data: "Error occured: " +err
-			});
-		}else{
-			if(user){
-				res.json({
-					type: false,
-					data: "User already exists!"
-				});
-			}else{
-				var userModel = new User();
-				userModel.email = req.body.email;
-				userModel.password = req.body.password;
-				userModel.save(function(err, user){
-					user.token = jwt.sign(user, secret);
-					user.save(function(err){
-						res.json({
-							type: true,
-							data: "User Register Successfully",
-						});
-					});
-				});
-			}
-		}
-	});
-});
-
-app.get('/me', ensureAuthorized, function(req, res){
-	User.findOne({token:req.token}, function(err, user){
-		if(err){
-			res.json({
-				type:false,
-				data: "Error occured: " + err
-			});
-		}else{
-			res.json({
-				type: true,
-				data: user
-			});
-		}
-	});
-});
-
-function ensureAuthorized(req, res, next){
-	var bearerToken;
-	var bearerHeader = req.headers["authorization"];
-
-	if(typeof bearerHeader !== 'undefined'){
-		var bearer = bearerHeader.split(" ");
-		bearerToken = bearer[1];
-		req.token = bearerToken;
-		next();
-	}else{
-		res.send(403);
-	}
-}

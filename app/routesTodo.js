@@ -27,14 +27,6 @@ module.exports = function(app){
 			// get and return all todos after adding another todo
 			getTodos(res);
 		});
-		//Todo.create({
-		//	text: req.body.text,
-		//	done: false
-		//}, function(err, todo){
-		//	if(err) res.send(err);
-			// get and return all todos after you create another
-		//	getTodos(res);
-		//});
 	});
 
 	// delete a todo
