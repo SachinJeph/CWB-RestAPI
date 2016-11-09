@@ -1,4 +1,5 @@
 var jwt = require('jwt-simple');
+var moment = require('moment');
 var UserModel = require('../models/user');
 
 var auth = {
@@ -8,38 +9,40 @@ var auth = {
 
 		if(username == '' || password == ''){
 			res.status(401);
-			res.json({"status":401, "message":"Authentication Error"});
-			return;
+			return res.json({"status":401, "message":"Authentication Error"});
 		}
 
-		dbUserObj = auth.validate(username, password);
-		
-		if(!dbUserObj){
-			res.status(401);
-			res.json({"status":401, "message":"Invalid credentials"});
-			return;
-		}
+		auth.validate(username, password, function(err, userData){
+			if(err || !userData){
+				res.status(401);
+				return res.json({"status":401, "message":"Invalid credentials"});
+			}
 
-		var expires = moment().add('days', 7).valueOf(); // expires in 7 days
-		var token = jwt.encode({exp:expires, iss:dbUserObj.id}, require('../config/secret')());
-
-		res.json({
-			token:token,
-			expires: expires,
-			user: dbUserObj.toJSON()
+        	        var expires = moment().add(7, 'days').valueOf(); // expires in 7 days
+        	        var token = jwt.encode({exp:expires, iss:userData._id}, require('../config/secret.js')());
+			return res.json({
+				token:token,
+				expires: expires,
+				user: userData
+			});
 		});
 	},
-	validate:function(username, password){
+	validate: function(username, password, cb){
 		UserModel.findOne({username:username}, function(err, user){
-			if(err) return null;
-			
+			if(err) cb(err);
+
 			if(user){
 				user.comparePassword(password, function(err, isMatch){
-					if(err) return null;
-					if(isMatch) return user;
+					if(err) cb(err);
+					if(isMatch){
+						cb(null, user);
+					}else{
+						cb(null, null);
+					}
 				});
+			}else{
+				cb(null, null);
 			}
-			return null;
 		});
 	},
 	validateUser: function(id){
