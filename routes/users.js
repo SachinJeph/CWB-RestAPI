@@ -1,7 +1,15 @@
+var UserModel = require('../models/user');
+
 var users = {
 	getAll: function(req, res){
-		var alluser = data;
-		res.json(allusers);
+		UserModel.find({"role":"user"}, function(err, users){
+			if(err){
+                                res.status(401);
+                                return res.json({"status":401, "message":"Pleaset Try Again", "error":err});
+                        }
+
+			return res.json({"data": users});
+		});
 	},
 	getOne: function(req, res){
 		var id = req.params.id;

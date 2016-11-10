@@ -45,10 +45,10 @@ var auth = {
 			}
 		});
 	},
-	validateUser: function(id){
+	validateUser: function(id, cb){
 		UserModel.findOne({'_id':id}, function(err, user){
-			if(err) return null;
-			return user;
+			if(err) cb(err);
+			cb(null, user);
 		});
 	},
 };
