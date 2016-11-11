@@ -6,6 +6,10 @@ var user = require('./users.js');
 
 /** Routes that can be accessed by any one **/
 router.post('/login', auth.login);
+router.post('/register', auth.register);
+
+/** Routes that can be access only by authenticated users **/
+router.get('/api/v1/me/', auth.login);
 
 /** Routes that can be access only by authenticated & authorized users **/
 router.get('/api/v1/admin/users', user.getAll);

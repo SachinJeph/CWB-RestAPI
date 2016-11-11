@@ -3,6 +3,43 @@ var moment = require('moment');
 var UserModel = require('../models/user');
 
 var auth = {
+	register: function(req, res){
+		var fullname = req.body.fullname || '';
+		var username = req.body.username || '';
+		var password = req.body.password || '';
+
+		if(fullname == '' || username == '' || password == ''){
+			res.status(401);
+			return res.json({"status":401, "message":"Required Field Missing"});
+		}
+
+		UserModel.findOne({username:username}, function(err, user){
+			if(err){
+				res.status("401");
+				return res.json({"status":401, "message":"Please Try Again", "Error":err});
+			}
+			console.log(user);
+			if(user){
+				res.status("401");
+				return res.json({"status":401, "message":"User Already Exists"});
+			}
+
+			var userData = new UserModel();
+			userData.name = fullname;
+			userData.username = username;
+			userData.password = password;
+			userData.role = 'user';
+			userData.save(function(err){
+				if(err){
+					res.status("401");
+					return res.json({"status":401, "message":"Please Try Again", "Error":err});
+				}else{
+					res.status("200");
+					return res.json({"status":200, "message":"Thank your Registration!"});
+				}
+			});
+		});
+	},
 	login: function(req, res){
 		var username = req.body.username || '';
 		var password = req.body.password || '';
@@ -50,7 +87,7 @@ var auth = {
 			if(err) cb(err);
 			cb(null, user);
 		});
-	},
+	}
 };
 
 module.exports = auth;

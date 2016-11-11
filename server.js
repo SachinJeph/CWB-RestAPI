@@ -22,8 +22,9 @@ app.use(methodOverride());
 // CORS Support
 app.use(function(req, res, next){
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+	res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
+	if(req.method == 'OPTIONS') res.status(200).end();
 	next();
 });
 
@@ -54,7 +55,7 @@ app.use(function(req, res, next){
 });
 
 // Connect to mongoDB and start the server
-mongoose.connect('mongodb://localhost/rest-api');
+mongoose.connect('mongodb://localhost/rest-api-dev');
 mongoose.connection.once('open', function(){
 	//Load the models
 	//app.models = require('./models/index');
