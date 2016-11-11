@@ -33,7 +33,8 @@ module.exports = function(req, res, next){
 					return;
 				}
 
-				if((req.url.indexOf('/api/v1/')>=0 && user.role=='admin') || (req.url.indexOf('/api/v1/user')>=0 && user.role=='user')){
+				if((parsed_url.path == '/api/v1/me') || (req.url.indexOf('/api/v1/')>=0 && user.role=='admin') || (req.url.indexOf('/api/v1/user')>=0 && user.role=='user')){
+					req.user = user;
 					next();
 				}else{
 					res.status(403);

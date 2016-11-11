@@ -87,6 +87,17 @@ var auth = {
 			if(err) cb(err);
 			cb(null, user);
 		});
+	},
+	me: function(req, res){
+		auth.validateUser(req.user._id, function(err, user){
+			if(err){
+				res.status(401);
+                                return res.json({"status":401, "message":"Please Try Again", "Error":err});
+			}
+
+			res.status(200);
+			return res.json({"status":200, "data":user});
+		});
 	}
 };
 
