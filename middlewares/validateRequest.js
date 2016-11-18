@@ -1,4 +1,5 @@
 var jwt = require('jwt-simple');
+var moment = require('moment')
 var url = require('url');
 var validateUser = require('../routes/auth').validateUser;
 
@@ -19,7 +20,7 @@ module.exports = function(req, res, next){
 		try{
 			var decoded = jwt.decode(token, require('../config/secret.js')());
 
-			if(decoded.exp <= Date.now()){
+			if(decoded.exp <= moment.unix()){
 				res.status(400);
 				res.json({"status":400, "message":"Access Token Expired"});
 				return;

@@ -1,6 +1,6 @@
 var jwt = require('jwt-simple');
 var moment = require('moment');
-var UserModel = require('../models/user');
+var User = require('../models/user');
 
 var auth = {
 	register: function(req, res){
@@ -13,30 +13,28 @@ var auth = {
 			return res.json({"status":401, "message":"Required Field Missing"});
 		}
 
-		UserModel.findOne({username:username}, function(err, user){
+		User.findOne({username:username}, function(err, existingUser){
 			if(err){
-				res.status("401");
-				return res.json({"status":401, "message":"Please Try Again", "Error":err});
+				res.status("500");
+				return res.json({"status":500, "message":"Please Try Again", "error":err});
 			}
-			console.log(user);
-			if(user){
-				res.status("401");
-				return res.json({"status":401, "message":"User Already Exists"});
+			if(existingUser){
+				res.status("409");
+				return res.json({"status":409, "message":"User Already Exists"});
 			}
 
-			var userData = new UserModel();
+			var userData = new User();
 			userData.name = fullname;
 			userData.username = username;
 			userData.password = password;
 			userData.role = 'user';
-			userData.save(function(err){
+			userData.save(function(err, result){
 				if(err){
-					res.status("401");
-					return res.json({"status":401, "message":"Please Try Again", "Error":err});
-				}else{
-					res.status("200");
-					return res.json({"status":200, "message":"Thank your Registration!"});
+					res.status("500");
+					return res.json({"status":500, "message":"Please Try Again", "error":err});
 				}
+				res.status("200");
+				return res.json({"status":200, "message":"Thank your Registration!", token:createJWT(result)});
 			});
 		});
 	},
@@ -50,22 +48,21 @@ var auth = {
 		}
 
 		auth.validate(username, password, function(err, userData){
-			if(err || !userData){
+			if(err){
+				res.status("500");
+				return res.json({"status":500, "message":"Please Try Again", "error":err});
+			}
+
+			if(!userData){
 				res.status(401);
 				return res.json({"status":401, "message":"Invalid credentials"});
 			}
-
-        	        var expires = moment().add(7, 'days').valueOf(); // expires in 7 days
-        	        var token = jwt.encode({exp:expires, iss:userData._id}, require('../config/secret.js')());
-			return res.json({
-				token:token,
-				expires: expires,
-				user: userData
-			});
+			res.status("200");
+			return res.json({"status":200, "message":"Thank you for Login!" ,token:createJWT(userData)});
 		});
 	},
 	validate: function(username, password, cb){
-		UserModel.findOne({username:username}, function(err, user){
+		User.findOne({username:username}, function(err, user){
 			if(err) cb(err);
 
 			if(user){
@@ -83,7 +80,7 @@ var auth = {
 		});
 	},
 	validateUser: function(id, cb){
-		UserModel.findOne({'_id':id}, function(err, user){
+		User.findOne({'_id':id}, function(err, user){
 			if(err) cb(err);
 			cb(null, user);
 		});
@@ -91,34 +88,19 @@ var auth = {
 	me: function(req, res){
 		auth.validateUser(req.user._id, function(err, user){
 			if(err){
-				res.status(401);
-                                return res.json({"status":401, "message":"Please Try Again", "Error":err});
+				res.status(500);
+                                return res.json({"status":500, "message":"Please Try Again", "Error":err});
 			}
 
 			res.status(200);
 			return res.json({"status":200, "data":user});
 		});
 	},
-
-	newLogin: function(req, res){
-		UserModel.findOne({username:req.body.email}, function(err, user){
-			if(!user){
-				return res.status(401).send({message: 'Invalid email and/or password'});
-			}
-
-			user.comparePassword(req.body.password, function(err, isMatch){
-				if(!isMatch){
-					return res.status(401).send({message: 'Invalid email and/or password'});
-				}
-				res.send({token:createJWT(user)});
-			});
-		});
-	},
 };
 
 function createJWT(user){
 	var payload = {
-		sub: user._id,
+		iss: user._id,
 		iat: moment().unix(),
 		exp: moment().add(14, 'days').unix()
 	};
