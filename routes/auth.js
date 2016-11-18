@@ -87,15 +87,8 @@ var auth = {
 		});
 	},
 	me: function(req, res){
-		auth.validateUser(req.user._id, function(err, user){
-			if(err){
-				res.status(500);
-                                return res.json({"status":500, "message":"Please Try Again", "Error":err});
-			}
-
-			res.status(200);
-			return res.json({"status":200, "data":user});
-		});
+		res.status(200);
+		return res.json({"status":200, "data":req.user});
 	},
 };
 
