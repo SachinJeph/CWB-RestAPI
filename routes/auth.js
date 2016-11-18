@@ -98,7 +98,31 @@ var auth = {
 			res.status(200);
 			return res.json({"status":200, "data":user});
 		});
-	}
+	},
+
+	newLogin: function(req, res){
+		UserModel.findOne({username:req.body.email}, function(err, user){
+			if(!user){
+				return res.status(401).send({message: 'Invalid email and/or password'});
+			}
+
+			user.comparePassword(req.body.password, function(err, isMatch){
+				if(!isMatch){
+					return res.status(401).send({message: 'Invalid email and/or password'});
+				}
+				res.send({token:createJWT(user)});
+			});
+		});
+	},
 };
+
+function createJWT(user){
+	var payload = {
+		sub: user._id,
+		iat: moment().unix(),
+		exp: moment().add(14, 'days').unix()
+	};
+	return jwt.encode(payload, require('../config/secret.js')());
+}
 
 module.exports = auth;

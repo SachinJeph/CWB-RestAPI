@@ -12,19 +12,18 @@ var app = express();
 var port = process.env.PORT || 7000;
 
 // Add Middleware necessary for REST API's
-app.use(express.static(__dirname + '/public'));
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 app.use(methodOverride());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // CORS Support
 app.use(function(req, res, next){
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
-	if(req.method == 'OPTIONS') res.status(200).end();
 	next();
 });
 
@@ -36,12 +35,6 @@ app.all('/app/v1/*', function(req, res, next){
 	if(req.method == 'OPTIONS') res.status(200).end();
 	next();
 });
-
-// Import the model
-var UserModel = require('./models/user');
-
-// Routes for old services
-require('./app/routesTodo.js')(app); // todos apis
 
 // Auth Middleware
 // Only the requresst that start with /api/v1/* will be checked for the token.

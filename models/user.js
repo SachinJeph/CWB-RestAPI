@@ -12,6 +12,14 @@ var UserSchema = new mongoose.Schema({
 	meta: {
 		website: String,
 	},
+	facebook: {
+		id: String,
+		email: String
+	},
+	google: {
+		id: String,
+		email: String
+	},
 	created_at: Date,
 	updated_at: Date
 });

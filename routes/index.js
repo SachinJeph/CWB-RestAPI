@@ -5,6 +5,8 @@ var auth = require('./auth.js');
 var user = require('./users.js');
 
 /** Routes that can be accessed by any one **/
+router.post('/auth/login', auth.newLogin);
+
 router.post('/login', auth.login);
 router.post('/register', auth.register);
 
