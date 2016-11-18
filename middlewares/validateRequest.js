@@ -22,35 +22,33 @@ module.exports = function(req, res, next){
 
 			if(decoded.exp <= moment.unix()){
 				res.status(400);
-				res.json({"status":400, "message":"Access Token Expired"});
-				return;
+				return res.json({"status":400, "message":"Access Token Expired"});
 			}
 
 			// Authorize the user to see if s/he can access our resources
 			validateUser(decoded.iss, function(err, user){
 				if(err || !user){
 					res.status(401);
-					res.json({"status":401, "message":"Invalid User"});
-					return;
+					return res.json({"status":401, "message":"Invalid User"});
 				}
 
-				if((parsed_url.path == '/api/v1/me') || (req.url.indexOf('/api/v1/')>=0 && user.role=='admin') || (req.url.indexOf('/api/v1/user')>=0 && user.role=='user')){
-					req.user = user;
-					next();
-				}else{
-					res.status(403);
-					res.json({"status":403, "message":"Not Authorized"});
-					return;
-				}
+				req.user = user;
+				next();
+
+				//if((req.url.indexOf('/api/v1/admin')>=0 && user.role=='admin') || (req.url.indexOf('/api/v1')>=0 && user.role=='user')){
+					//req.user = user;
+					//next();
+//				}else{
+					//res.status(403);
+//					return res.json({"status":403, "message":"Not Authorized"});
+//				}
 			});
 		}catch(err){
 			res.status(500);
-			res.json({"status":500, "message":"Oops something went wrong", "error":err})
-			return;
+			return res.json({"status":500, "message":"Oops something went wrong", "error":err})
 		}
 	}else{
 		res.status(401);
-		res.json({"status":401, "message":"Invalid Token or Key"});
-		return;
+		return res.json({"status":401, "message":"Invalid Token or Key"});
 	}
 };

@@ -20,6 +20,7 @@ var UserSchema = new mongoose.Schema({
 		id: String,
 		email: String
 	},
+	version: Number,
 	created_at: Date,
 	updated_at: Date
 });

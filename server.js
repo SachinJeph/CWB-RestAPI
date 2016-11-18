@@ -29,7 +29,7 @@ app.use(function(req, res, next){
 	next();
 });
 
-app.all('/app/v1/*', function(req, res, next){
+app.all('/api/*', function(req, res, next){
 	res.header("Access-Control-Allow-Origin", "*"); // restrict it to required domain
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header("Access-Control-Allow-Headers", 'Content-type,Accept,X-Access-Token,X-Key'); // Set custom headers for CORS
@@ -41,12 +41,13 @@ app.all('/app/v1/*', function(req, res, next){
 // Auth Middleware
 // Only the requresst that start with /api/v1/* will be checked for the token.
 // Any URL's That do not follow the below pattern should be avoided unless you are sure that authentication is not needed
-app.all('/api/v1/*', [require('./middlewares/validateRequest')]);
+app.all('/api/*', [require('./middlewares/validateRequest')]);
 
 app.use('/', require('./routes'));
 
-app.use(function(req, res, next){
-	res.status(404).send('Page Not Found');
+app.use(function(req, res){
+	res.status(404);
+	res.json({"status":404, "message":'Page Not Found'});
 });
 
 // Connect to mongoDB and start the server

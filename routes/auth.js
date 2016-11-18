@@ -28,6 +28,7 @@ var auth = {
 			userData.username = username;
 			userData.password = password;
 			userData.role = 'user';
+			userData.version = 1;
 			userData.save(function(err, result){
 				if(err){
 					res.status("500");
