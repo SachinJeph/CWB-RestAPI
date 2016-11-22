@@ -7,7 +7,7 @@ var SchemaTypes = mongoose.Schema.Types;
 // Define our application schema
 var AppSchema = new mongoose.Schema({
 	title: {type:String, trim:true},
-	appSecretId: {type:String},
+	appSecretKey: {type:String},
 	appClientId: {type:String},
 	ownerId: {type:SchemaTypes.ObjectId, ref:'User'},
 	version: {type:Number, default:1},
