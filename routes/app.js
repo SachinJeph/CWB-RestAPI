@@ -6,20 +6,37 @@ var apps = {
 	getAll: function(req, res){
 		conditions = {};
 		if(req.user.role == 'user'){
-			conditions.set('ownerId', req.user._id);
+			conditions['ownerId'] = req.user._id;
 		};
-		AppModel.find(conditions, function(err, apps){
+		AppModel.find(conditions, function(err, appsResult){
 			if(err){
-                                return res.status(401).json({"status":401, "message":"Pleaset Try Again", "error":err});
+                                return res.status(500).json({"status":500, "message":"Please Try Again", "error":err});
                         }
 
-			return res.status(200).json({"status":200, "data": apps});
+			if(!appsResult.length){
+				return res.status(401).json({"status":401, "message":"no application found"});
+			}
+
+			return res.status(200).json({"status":200, "data":appsResult});
 		});
 	},
 	getOne: function(req, res){
-		var id = req.params.id;
-		var user = data[0];
-		res.json(user);
+		conditions = {_id:req.params.id};
+		if(req.user.role == 'user'){
+			conditions['ownerId'] = req.user._id;
+		}
+
+		AppModel.find(conditions, function(err, appResult){
+			if(err){
+				return res.status(500).json({"status":500, "message":"Please Try Again", "error":err});
+			}
+
+			if(!appResult.length){
+				return res.status(401).json({"status":401, "message":"application not found"});
+			}
+
+			return res.status(200).json({"status":200, "data":appResult});
+		});
 	},
 	create: function(req, res){
 		var appname = req.body.appname || '';

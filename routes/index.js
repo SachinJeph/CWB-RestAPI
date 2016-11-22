@@ -16,6 +16,8 @@ router.get('/me', middlewareAuth,  auth.me);
 
 /** get all application register to the particular user **/
 router.get('/api/v1/apps', app.getAll);
+router.get('/api/v1/app/:id', app.getOne);
+router.post('/api/v1/app', app.create);
 
 
 /** Admin Routes need to be verify here **/
