@@ -21,34 +21,22 @@ module.exports = function(req, res, next){
 			var decoded = jwt.decode(token, require('../config/secret.js')());
 
 			if(decoded.exp <= moment.unix()){
-				res.status(400);
-				return res.json({"status":400, "message":"Access Token Expired"});
+				return res.status(400).json({"status":400, "message":"Access Token Expired"});
 			}
 
 			// Authorize the user to see if s/he can access our resources
 			validateUser(decoded.iss, function(err, user){
 				if(err || !user){
-					res.status(401);
-					return res.json({"status":401, "message":"Invalid User"});
+					return res.status(401).json({"status":401, "message":"Invalid User"});
 				}
 
 				req.user = user;
 				next();
-
-				//if((req.url.indexOf('/api/v1/admin')>=0 && user.role=='admin') || (req.url.indexOf('/api/v1')>=0 && user.role=='user')){
-					//req.user = user;
-					//next();
-//				}else{
-					//res.status(403);
-//					return res.json({"status":403, "message":"Not Authorized"});
-//				}
 			});
 		}catch(err){
-			res.status(500);
-			return res.json({"status":500, "message":"Oops something went wrong", "error":err})
+			return res.status(500).json({"status":500, "message":"Oops something went wrong", "error":err})
 		}
 	}else{
-		res.status(401);
-		return res.json({"status":401, "message":"Invalid Token or Key"});
+		return res.status(401).json({"status":401, "message":"Invalid Token or Key"});
 	}
 };
