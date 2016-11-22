@@ -9,33 +9,26 @@ var auth = {
 		var password = req.body.password || '';
 
 		if(fullname == '' || username == '' || password == ''){
-			res.status(401);
-			return res.json({"status":401, "message":"Required Field Missing"});
+			return res.status(401).json({"status":401, "message":"Required Field Missing"});
 		}
 
 		User.findOne({username:username}, function(err, existingUser){
 			if(err){
-				res.status("500");
-				return res.json({"status":500, "message":"Please Try Again", "error":err});
+				return res.status(500).json({"status":500, "message":"Please Try Again", "error":err});
 			}
 			if(existingUser){
-				res.status("409");
-				return res.json({"status":409, "message":"User Already Exists"});
+				return res.status(409).json({"status":409, "message":"User Already Exists"});
 			}
 
 			var userData = new User();
 			userData.name = fullname;
 			userData.username = username;
 			userData.password = password;
-			userData.role = 'user';
-			userData.version = 1;
 			userData.save(function(err, result){
 				if(err){
-					res.status("500");
-					return res.json({"status":500, "message":"Please Try Again", "error":err});
+					return res.status(500).json({"status":500, "message":"Please Try Again", "error":err});
 				}
-				res.status("200");
-				return res.json({"status":200, "message":"Thank your Registration!", token:createJWT(result)});
+				return res.status(200).json({"status":200, "message":"Thank your Registration!", token:createJWT(result)});
 			});
 		});
 	},
@@ -44,22 +37,18 @@ var auth = {
 		var password = req.body.password || '';
 
 		if(username == '' || password == ''){
-			res.status(401);
-			return res.json({"status":401, "message":"Authentication Error"});
+			return res.status(401).json({"status":401, "message":"Authentication Error"});
 		}
 
 		auth.validate(username, password, function(err, userData){
 			if(err){
-				res.status("500");
-				return res.json({"status":500, "message":"Please Try Again", "error":err});
+				return res.status(500).json({"status":500, "message":"Please Try Again", "error":err});
 			}
 
 			if(!userData){
-				res.status(401);
-				return res.json({"status":401, "message":"Invalid credentials"});
+				return res.status(401).json({"status":401, "message":"Invalid credentials"});
 			}
-			res.status("200");
-			return res.json({"status":200, "message":"Thank you for Login!" ,token:createJWT(userData)});
+			return res.status(200).json({"status":200, "message":"Thank you for Login!" ,token:createJWT(userData)});
 		});
 	},
 	validate: function(username, password, cb){
@@ -87,8 +76,7 @@ var auth = {
 		});
 	},
 	me: function(req, res){
-		res.status(200);
-		return res.json({"status":200, "data":req.user});
+		return res.status(200).json({"status":200, "data":req.user});
 	},
 };
 
