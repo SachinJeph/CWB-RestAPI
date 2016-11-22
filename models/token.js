@@ -1,12 +1,15 @@
 // Load required packages
 var mongoose = require('mongoose');
+require('mongoose-double')(mongoose);
+
+var SchemaTypes = mongoose.Schema.Types;
 
 // Define our token schema
 var TokenSchema = new mongoose.Schema({
-	token: {type:String, required:true},
-	userId: {type:String, required: true},
-	appId: {type:String, required: true}
+	value: {type:String, required:true},
+	appId: {type:SchemaTypes.ObjectId, ref:'App', required: true},
+	userId: {type:SchemaTypes.ObjectId, ref:'User', required: true}
 });
 
 // Export the Mongoose model
-modulle.exports = mongoose.model('Token', TokenSchema);
+module.exports = mongoose.model('Token', TokenSchema);

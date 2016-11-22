@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+//var oauth2Controller = require('../controllers/oauth2');
+
 var auth = require('./auth.js');
 var user = require('./users.js');
 var app = require('./app.js');
@@ -10,6 +12,13 @@ var middlewareAuth = require('../middlewares/validateRequest');
 /** Routes that can be accessed by any one **/
 router.post('/auth/login', auth.login);
 router.post('/auth/register', auth.register);
+
+/** Routes that can be accessed by apps **/
+//router.post('/oauth2/email', emails.create);
+
+/** Routes that can be accessed by authenticated user for the apps login **/
+//router.get('/api/v1/oAuth2/authorize', oauth2Controller.authorization);
+//router.post('/api/v1/oAuth2/authorize', oauth2Controller.decision);
 
 /** Routes that can be access only by authenticated users **/
 router.get('/me', middlewareAuth,  auth.me);

@@ -6,6 +6,10 @@ var jwt = require('jwt-simple');
 var mongoose = require('mongoose');
 var methodOverride = require('method-override');
 
+// Dependencies for oauth2 services
+//var ejs = require('ejs');
+//var session = require('express-session');
+
 // Create the application
 var app = express();
 
@@ -18,6 +22,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Set view engine to ejs
+/**
+app.set('view engine', 'ejs');
+app.use(session({
+	secret: require('./config/secret.js')(),
+	saveUninitialized: true,
+	resave: true
+}));
+*/
 
 // CORS Support
 app.use(function(req, res, next){

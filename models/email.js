@@ -4,19 +4,17 @@ require('mongoose-double')(mongoose);
 
 var SchemaTypes = mongoose.Schema.Types;
 
+var emailStatus = 'pending sent'.split(' ');
+
 // Define our application schema
-var AppSchema = new mongoose.Schema({
-	title: {type:String, trim:true},
-	description: {type:String},
-	meta: {
-		emails: {
-			send: {type:Number, default:0},
-			credit: {type:Number, default:10}
-		}
-	},
-	appSecretKey: {type:String},
-	appClientId: {type:String},
-	ownerId: {type:SchemaTypes.ObjectId, ref:'User'},
+var EmailSchema = new mongoose.Schema({
+	name: {type:String},
+	from: {type:String},
+	to: {type:String},
+	subject: {type:String},
+	content: {type:String},
+	status: {type:String, enum:emailStatus, default:'pending', require:true},
+	appId: {type:SchemaTypes.ObjectId, ref:'App'},
 	version: {type:Number, default:1},
 	created_at: Date,
 	updated_at: Date
