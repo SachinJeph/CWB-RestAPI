@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt');
 
 var SALT_WORK_FACTOR = 10;
 
-var userRole = 'admin client user'.split(' ');
+var userRole = 'admin user'.split(' ');
 
 // Create the UserSchema.
 var UserSchema = new mongoose.Schema({

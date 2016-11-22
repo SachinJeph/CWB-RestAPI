@@ -3,6 +3,7 @@ var router = express.Router();
 
 var auth = require('./auth.js');
 var user = require('./users.js');
+var app = require('./app.js');
 
 var middlewareAuth = require('../middlewares/validateRequest');
 
@@ -12,6 +13,18 @@ router.post('/auth/register', auth.register);
 
 /** Routes that can be access only by authenticated users **/
 router.get('/me', middlewareAuth,  auth.me);
+
+/** get all application register to the particular user **/
+router.get('/api/v1/apps', app.getAll);
+
+
+/** Admin Routes need to be verify here **/
+router.all('/api/v1/admin/*', function(req, res, next){
+	if(req.user.role != 'admin'){
+		return res.status(403).json({"status":403, "message":"Not Authorized"});
+	}
+	next();
+});
 
 /** Routes that can be access only by authenticated & authorized users **/
 router.get('/api/v1/admin/users', user.getAll);

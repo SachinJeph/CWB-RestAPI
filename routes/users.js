@@ -4,11 +4,10 @@ var users = {
 	getAll: function(req, res){
 		UserModel.find({"role":"user"}, function(err, users){
 			if(err){
-                                res.status(401);
-                                return res.json({"status":401, "message":"Pleaset Try Again", "error":err});
+                                return res.status(401).json({"status":401, "message":"Pleaset Try Again", "error":err});
                         }
 
-			return res.json({"data": users});
+			return res.status(200).json({"status":200, "data": users});
 		});
 	},
 	getOne: function(req, res){
