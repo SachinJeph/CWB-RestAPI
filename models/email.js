@@ -20,7 +20,7 @@ var EmailSchema = new mongoose.Schema({
 	updated_at: Date
 });
 
-AppSchema.pre('save', function(next){
+EmailSchema.pre('save', function(next){
 	// get the current date
 	var currentDate = new Date();
 
@@ -34,4 +34,4 @@ AppSchema.pre('save', function(next){
 });
 
 // Export the model
-module.exports = mongoose.model('App', AppSchema);
+module.exports = mongoose.model('Email', EmailSchema);
