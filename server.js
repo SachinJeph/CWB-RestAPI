@@ -7,11 +7,18 @@ var mongoose = require('mongoose');
 var methodOverride = require('method-override');
 
 // Dependencies for oauth2 services
-//var ejs = require('ejs');
-//var session = require('express-session');
+var oauthServer = require('oauth2-server');
+var authenticate = require('./middlewares/authenticate');
+var Request = oauthServer.Request;
+var Response = oauthServer.Response;
+var models = require('./models');
 
 // Create the application
 var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 var port = process.env.PORT || 7000;
 
@@ -23,15 +30,12 @@ app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set view engine to ejs
-/**
-app.set('view engine', 'ejs');
-app.use(session({
-	secret: require('./config/secret.js')(),
-	saveUninitialized: true,
-	resave: true
-}));
-*/
+app.oauth = new oauthServer({
+	model: models.OAuth,
+	//model: require('./models/oauth/oauth_model'),
+	grants: ['password', 'refresh_token'],
+	debug: true
+});
 
 // CORS Support
 app.use(function(req, res, next){
@@ -47,7 +51,7 @@ app.all('/api/*', function(req, res, next){
 	res.header("Access-Control-Allow-Origin", "*"); // restrict it to required domain
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header("Access-Control-Allow-Headers", 'Content-type,Accept,X-Access-Token,X-Key'); // Set custom headers for CORS
-	
+
 	if(req.method == 'OPTIONS') res.status(200).end();
 	next();
 });
@@ -56,8 +60,14 @@ app.all('/api/*', function(req, res, next){
 // Only the requresst that start with /api/v1/* will be checked for the token.
 // Any URL's That do not follow the below pattern should be avoided unless you are sure that authentication is not needed
 app.all('/api/*', [require('./middlewares/validateRequest')]);
+require('./middlewares/oauth')(app);
+app.all('/oauth/*', [authenticate()]);
 
 app.use('/', require('./routes'));
+app.get('/hello', authenticate(), function(req, res, next){
+	res.send('Secret area');
+});
+
 
 app.use(function(req, res){
 	res.status(404);
