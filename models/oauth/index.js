@@ -135,6 +135,8 @@ function saveToken(token, client, user){
 			user: user,
 			access_token: token.accessToken, // proxy
 			refresh_token: token.refreshToken, // proxy
+			token_type: 'bearer',
+			expires_in: token.accessTokenExpiresAt
 		}, token);
 	}).catch(function(err){
 		console.log("revokeToken - Err: ", err);

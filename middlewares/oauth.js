@@ -15,6 +15,14 @@ module.exports = function(app){
 
 		oauth.token(request, response).then(function(token){
 			// Todo: remove unnecessary values in response
+			delete token.client;
+			delete token.user;
+			delete token.accessToken;
+			delete token.accessTokenExpiresAt;
+			delete token.refreshToken;
+			delete token.refreshTokenExpiresAt;
+			delete token.scope;
+
 			return res.json(token);
 		}).catch(function(err){
 			return res.status(500).json(err);
